@@ -160,20 +160,6 @@
     .slot-title { color: #d9dade; font-size: 13px; font-weight: 550; }
     .slot-hint { color: #727680; font-size: 12px; }
 
-    .card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 22px;
-      color: #777b84;
-      font-size: 11px;
-    }
-
-    .privacy { display: inline-flex; align-items: center; gap: 7px; }
-    .privacy svg { width: 14px; height: 14px; color: #a8abb1; }
-    .step { color: #999da5; font-variant-numeric: tabular-nums; }
-
     @keyframes rise {
       from { opacity: 0; transform: translateY(14px) scale(.99); }
       to { opacity: 1; transform: translateY(0) scale(1); }
@@ -199,7 +185,7 @@
       <div class="brand-mark" aria-hidden="true">
         <img src="logo.jpg" alt="">
       </div>
-      <div class="brand-name"><span data-i18n="brand">✉️ Message Master</span> <span>/ Mini App</span></div>
+      <div class="brand-name"><span data-i18n="brand">✉️ Message Master</span></div>
     </header>
 
     <main>
@@ -233,8 +219,6 @@
         intro: "Complete the check below to continue to ✉️ Message Master.",
         slotTitle: "Captcha will appear here",
         slotHint: "Verification area",
-        secure: "Secure verification",
-        step: "STEP 01"
       },
       ru: {
         brand: "✉️ Message Master",
@@ -243,13 +227,16 @@
         intro: "Пройдите проверку ниже, чтобы продолжить работу с ✉️ Message Master.",
         slotTitle: "Здесь будет капча",
         slotHint: "Область проверки",
-        secure: "Защищённая проверка",
-        step: "ШАГ 01"
       }
     };
 
     const requestedLanguage = new URLSearchParams(location.search).get("lang");
-    const language = requestedLanguage === "ru" ? "ru" : "en";
+    const telegramLanguage = window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code;
+    const browserLanguage = navigator.language?.split("-")[0];
+    const language = requestedLanguage === "ru" ||
+      (!requestedLanguage && (telegramLanguage === "ru" || browserLanguage === "ru"))
+      ? "ru"
+      : "en";
     document.documentElement.lang = language;
     document.querySelectorAll("[data-i18n]").forEach((element) => {
       element.innerHTML = translations[language][element.dataset.i18n];
