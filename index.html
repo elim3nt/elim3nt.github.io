@@ -254,11 +254,28 @@
 
     // Replace this public key with the sitekey from the Cloudflare Turnstile widget.
     const TURNSTILE_SITE_KEY = "0x4AAAAAAFitw1NZi8WD-fsU";
+    const VERIFY_URL = "https://plain-credit-372d.el1m3n1.workers.dev/verify";
     const status = document.querySelector("#captcha-status");
 
     function setCaptchaStatus(key, className = "") {
       status.textContent = translations[language][key];
       status.className = `captcha-status ${className}`;
+    }
+
+    async function verifyCaptcha(token) {
+      const response = await fetch(VERIFY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          turnstileToken: token,
+          initData: window.Telegram?.WebApp?.initData || "",
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "Verification failed");
+      }
     }
 
     function renderTurnstile() {
@@ -273,10 +290,13 @@
       window.turnstile.render("#turnstile-widget", {
         sitekey: TURNSTILE_SITE_KEY,
         size: "normal",
-        callback: (token) => {
-          setCaptchaStatus("captchaPassed", "success");
-          if (window.Telegram?.WebApp) {
-            window.Telegram.WebApp.sendData(JSON.stringify({ turnstileToken: token }));
+        callback: async (token) => {
+          try {
+            await verifyCaptcha(token);
+            setCaptchaStatus("captchaPassed", "success");
+          } catch (error) {
+            console.error("Captcha verification failed:", error);
+            setCaptchaStatus("captchaError", "error");
           }
         },
         "expired-callback": () => setCaptchaStatus("captchaExpired", "error"),
