@@ -299,6 +299,9 @@
           try {
             await verifyCaptcha(token);
             setCaptchaStatus("captchaPassed", "success");
+            window.setTimeout(() => {
+              window.Telegram?.WebApp?.close();
+            }, 700);
           } catch (error) {
             console.error("Captcha verification failed:", error);
             status.textContent = `Ошибка: ${error.message}`;
