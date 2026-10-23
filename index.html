@@ -272,9 +272,14 @@
         }),
       });
 
-      const result = await response.json();
+      const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.ok) {
-        throw new Error(result.error || "Verification failed");
+        const details = Array.isArray(result.codes)
+          ? ` (${result.codes.join(", ")})`
+          : "";
+        throw new Error(
+          `${result.error || "Verification failed"}${details} [HTTP ${response.status}]`,
+        );
       }
     }
 
@@ -296,7 +301,8 @@
             setCaptchaStatus("captchaPassed", "success");
           } catch (error) {
             console.error("Captcha verification failed:", error);
-            setCaptchaStatus("captchaError", "error");
+            status.textContent = `Ошибка: ${error.message}`;
+            status.className = "captcha-status error";
           }
         },
         "expired-callback": () => setCaptchaStatus("captchaExpired", "error"),
