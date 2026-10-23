@@ -6,6 +6,8 @@
   <meta name="theme-color" content="#090a0c">
   <meta name="color-scheme" content="dark">
   <title>Message Master</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
   <style>
     :root {
       color-scheme: dark;
@@ -159,6 +161,10 @@
     .slot-icon svg { width: 17px; height: 17px; }
     .slot-title { color: #d9dade; font-size: 13px; font-weight: 550; }
     .slot-hint { color: #727680; font-size: 12px; }
+    .captcha-widget { min-height: 65px; display: grid; place-items: center; }
+    .captcha-status { color: #727680; font-size: 12px; line-height: 1.45; }
+    .captcha-status.success { color: #72d39a; }
+    .captcha-status.error { color: #ff8d86; }
 
     @keyframes rise {
       from { opacity: 0; transform: translateY(14px) scale(.99); }
@@ -194,16 +200,10 @@
         <h1 id="page-title" data-i18n="title">One small step<br>before you continue</h1>
         <p class="intro" data-i18n="intro">Complete the check below to continue to ✉️ Message Master.</p>
 
-        <div class="captcha-slot" aria-label="Captcha placeholder">
+        <div class="captcha-slot" aria-label="Captcha">
           <div class="slot-content">
-            <div class="slot-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M12 3.5 19 6v5.2c0 4.4-2.8 7.5-7 9.3-4.2-1.8-7-4.9-7-9.3V6l7-2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="slot-title" data-i18n="slotTitle">Captcha will appear here</div>
-            <div class="slot-hint" data-i18n="slotHint">Verification area</div>
+            <div id="turnstile-widget" class="captcha-widget"></div>
+            <div id="captcha-status" class="captcha-status" data-i18n="captchaStatus">Waiting for verification...</div>
           </div>
         </div>
 
@@ -217,16 +217,22 @@
         eyebrow: "Quick verification",
         title: "One small step<br>before you continue",
         intro: "Complete the check below to continue to ✉️ Message Master.",
-        slotTitle: "Captcha will appear here",
-        slotHint: "Verification area",
+        captchaStatus: "Waiting for verification...",
+        captchaSetup: "Add a Cloudflare Turnstile site key to enable verification.",
+        captchaPassed: "Verification completed.",
+        captchaExpired: "The check expired. Please try again.",
+        captchaError: "The check could not be completed. Please try again.",
       },
       ru: {
         brand: "✉️ Message Master",
         eyebrow: "Быстрая проверка",
         title: "Остался один шаг<br>перед продолжением",
         intro: "Пройдите проверку ниже, чтобы продолжить работу с ✉️ Message Master.",
-        slotTitle: "Здесь будет капча",
-        slotHint: "Область проверки",
+        captchaStatus: "Ожидание проверки...",
+        captchaSetup: "Добавьте sitekey Cloudflare Turnstile, чтобы включить проверку.",
+        captchaPassed: "Проверка пройдена.",
+        captchaExpired: "Срок проверки истёк. Пройдите её ещё раз.",
+        captchaError: "Не удалось выполнить проверку. Попробуйте ещё раз.",
       }
     };
 
@@ -241,6 +247,39 @@
     document.querySelectorAll("[data-i18n]").forEach((element) => {
       element.innerHTML = translations[language][element.dataset.i18n];
     });
+
+    // Replace this public key with the sitekey from the Cloudflare Turnstile widget.
+    const TURNSTILE_SITE_KEY = "0x4AAAAAAFitw1NZi8WD-fsU";
+    const status = document.querySelector("#captcha-status");
+
+    function setCaptchaStatus(key, className = "") {
+      status.textContent = translations[language][key];
+      status.className = `captcha-status ${className}`;
+    }
+
+    function renderTurnstile() {
+      if (!window.turnstile) {
+        window.setTimeout(renderTurnstile, 100);
+        return;
+      }
+      if (TURNSTILE_SITE_KEY.includes("PASTE_")) {
+        setCaptchaStatus("captchaSetup", "error");
+        return;
+      }
+      window.turnstile.render("#turnstile-widget", {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (token) => {
+          setCaptchaStatus("captchaPassed", "success");
+          if (window.Telegram?.WebApp) {
+            window.Telegram.WebApp.sendData(JSON.stringify({ turnstileToken: token }));
+          }
+        },
+        "expired-callback": () => setCaptchaStatus("captchaExpired", "error"),
+        "error-callback": () => setCaptchaStatus("captchaError", "error"),
+      });
+    }
+
+    renderTurnstile();
   </script>
 </body>
 </html>
