@@ -254,7 +254,7 @@
 
     // Replace this public key with the sitekey from the Cloudflare Turnstile widget.
     const TURNSTILE_SITE_KEY = "0x4AAAAAAFitw1NZi8WD-fsU";
-    const VERIFY_URL = "https://plain-credit-372d.el1m3n1.workers.dev/verify";
+    const VERIFY_URL = "https://plain-credit-372d.el1m3n1.workers.dev/JUHASdhwuayxdlaxjcajshUSADlasjd/verify";
     const status = document.querySelector("#captcha-status");
 
     function setCaptchaStatus(key, className = "") {
@@ -267,7 +267,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          turnstileToken: token,
+          token,
           initData: window.Telegram?.WebApp?.initData || "",
         }),
       });
