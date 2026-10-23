@@ -134,7 +134,7 @@
 
     .captcha-slot {
       display: grid;
-      min-height: 150px;
+      min-height: 122px;
       place-items: center;
       width: 100%;
       min-width: 0;
@@ -164,7 +164,7 @@
     .slot-icon svg { width: 17px; height: 17px; }
     .slot-title { color: #d9dade; font-size: 13px; font-weight: 550; }
     .slot-hint { color: #727680; font-size: 12px; }
-    .captcha-widget { display: grid; width: 100%; min-width: 0; min-height: 65px; place-items: center; }
+    .captcha-widget { display: grid; width: 300px; height: 65px; max-width: 100%; min-width: 0; place-items: center; }
     .captcha-status { color: #727680; font-size: 12px; line-height: 1.45; }
     .captcha-status.success { color: #72d39a; }
     .captcha-status.error { color: #ff8d86; }
@@ -180,7 +180,8 @@
       main { padding: 48px 0; }
       .card { padding: 27px 23px 23px; border-radius: 21px; }
       .card::before { left: 23px; }
-      .captcha-slot { min-height: 142px; padding: 12px 6px; }
+      .captcha-slot { min-height: 108px; padding: 8px 0; }
+      .captcha-widget { width: 340px; height: 58px; margin: -2px -20px; transform: scale(.88); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -271,7 +272,7 @@
       }
       window.turnstile.render("#turnstile-widget", {
         sitekey: TURNSTILE_SITE_KEY,
-        size: window.matchMedia("(max-width: 520px)").matches ? "compact" : "normal",
+        size: "normal",
         callback: (token) => {
           setCaptchaStatus("captchaPassed", "success");
           if (window.Telegram?.WebApp) {
