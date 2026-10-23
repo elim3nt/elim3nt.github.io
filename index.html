@@ -136,7 +136,10 @@
       display: grid;
       min-height: 150px;
       place-items: center;
-      padding: 24px;
+      width: 100%;
+      min-width: 0;
+      padding: 18px 10px;
+      overflow: hidden;
       border: 1px dashed #41434a;
       border-radius: 15px;
       background:
@@ -147,7 +150,7 @@
       text-align: center;
     }
 
-    .slot-content { display: grid; justify-items: center; gap: 9px; }
+    .slot-content { display: grid; width: 100%; min-width: 0; justify-items: center; gap: 9px; }
     .slot-icon {
       display: grid;
       width: 35px;
@@ -161,7 +164,7 @@
     .slot-icon svg { width: 17px; height: 17px; }
     .slot-title { color: #d9dade; font-size: 13px; font-weight: 550; }
     .slot-hint { color: #727680; font-size: 12px; }
-    .captcha-widget { min-height: 65px; display: grid; place-items: center; }
+    .captcha-widget { display: grid; width: 100%; min-width: 0; min-height: 65px; place-items: center; }
     .captcha-status { color: #727680; font-size: 12px; line-height: 1.45; }
     .captcha-status.success { color: #72d39a; }
     .captcha-status.error { color: #ff8d86; }
@@ -177,7 +180,7 @@
       main { padding: 48px 0; }
       .card { padding: 27px 23px 23px; border-radius: 21px; }
       .card::before { left: 23px; }
-      .captcha-slot { min-height: 142px; }
+      .captcha-slot { min-height: 142px; padding: 12px 6px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -268,6 +271,7 @@
       }
       window.turnstile.render("#turnstile-widget", {
         sitekey: TURNSTILE_SITE_KEY,
+        size: window.matchMedia("(max-width: 520px)").matches ? "compact" : "normal",
         callback: (token) => {
           setCaptchaStatus("captchaPassed", "success");
           if (window.Telegram?.WebApp) {
